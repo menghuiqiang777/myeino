@@ -41,7 +41,7 @@ func (bp *baseProvider) InitModel(modelName string) (interface{}, error) {
 	apiKey, ok := os.LookupEnv(bp.apiKeyEnv)
 	if !ok {
 		err := fmt.Errorf("%s environment variable is not set.", bp.apiKeyEnv)
-		log.Println(err)
+		log.Printf("Error: %s\n", err)
 		return nil, err
 	}
 	var baseURL string
@@ -49,7 +49,7 @@ func (bp *baseProvider) InitModel(modelName string) (interface{}, error) {
 		baseURL, ok = os.LookupEnv(bp.baseURLEnv)
 		if !ok {
 			err := fmt.Errorf("%s environment variable is not set.", bp.baseURLEnv)
-			log.Println(err)
+			log.Printf("Error: %s\n", err)
 			return nil, err
 		}
 	}
@@ -58,7 +58,7 @@ func (bp *baseProvider) InitModel(modelName string) (interface{}, error) {
 	config := bp.configFunc(apiKey, baseURL, modelName)
 	model, err := bp.initFunc(ctx, config)
 	if err != nil {
-		log.Println(err)
+		log.Printf("Error initializing model: %s\n", err)
 		return nil, err
 	}
 
@@ -116,29 +116,40 @@ func NewArkProvider() *ArkProvider {
 
 // GetProvider 根据厂商名称返回对应的模型提供者
 func GetProvider(vendor string) (Provider, error) {
+	var provider Provider
+	var err error
 	switch vendor {
 	case "qwen":
-		return NewQwenProvider(), nil
+		provider = NewQwenProvider()
 	case "ark":
-		return NewArkProvider(), nil
+		provider = NewArkProvider()
 	default:
-		return nil, fmt.Errorf("unsupported vendor: %s", vendor)
+		err = fmt.Errorf("unsupported vendor: %s", vendor)
 	}
+	if err != nil {
+		log.Printf("Error getting provider: %s\n", err)
+		return nil, err
+	}
+	return provider, nil
 }
 
 // GetChatModel 根据厂商和模型名称返回 ChatModel 类型的模型
 func GetChatModel(vendor, modelName string) (model.ChatModel, error) {
 	provider, err := GetProvider(vendor)
 	if err != nil {
+		log.Printf("Error getting provider: %s\n", err)
 		return nil, err
 	}
 	modelObj, err := provider.InitModel(modelName)
 	if err != nil {
+		log.Printf("Error initializing model: %s\n", err)
 		return nil, err
 	}
 	chatModel, ok := modelObj.(model.ChatModel)
 	if !ok {
-		return nil, fmt.Errorf("the initialized model does not implement the ChatModel interface")
+		err = fmt.Errorf("the initialized model does not implement the ChatModel interface")
+		log.Printf("Error casting model: %s\n", err)
+		return nil, err
 	}
 	return chatModel, nil
 }
