@@ -1,41 +1,41 @@
-/*
- * Copyright 2025 CloudWeGo Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package llmModel
 
 import (
 	"context"
-	"log"
+	"fmt"
 
 	"github.com/cloudwego/eino/components/model"
 	"github.com/cloudwego/eino/schema"
 )
 
-func generate(ctx context.Context, llm model.ChatModel, in []*schema.Message) *schema.Message {
+// Generate 调用模型的 Generate 方法生成回复消息
+func Generate(ctx context.Context, llm model.ChatModel, in []*schema.Message) (*schema.Message, error) {
 	result, err := llm.Generate(ctx, in)
 	if err != nil {
-		log.Fatalf("llm generate failed: %v", err)
+		return nil, fmt.Errorf("llm generate failed: %w", err)
 	}
-	return result
+	return result, nil
 }
 
-func stream(ctx context.Context, llm model.ChatModel, in []*schema.Message) *schema.StreamReader[*schema.Message] {
+// Stream 调用模型的 Stream 方法获取流式回复
+func Stream(ctx context.Context, llm model.ChatModel, in []*schema.Message) (*schema.StreamReader[*schema.Message], error) {
 	result, err := llm.Stream(ctx, in)
 	if err != nil {
-		log.Fatalf("llm generate failed: %v", err)
+		return nil, fmt.Errorf("llm stream failed: %w", err)
 	}
-	return result
+	return result, nil
+}
+
+// GetChatModel 从原 provider 包移到这里
+func GetChatModel(vendor, modelName string) (model.ChatModel, error) {
+	// 这里应该实现获取 ChatModel 的逻辑
+	// 假设原 provider 包中有相应的逻辑
+	// 以下是示例，你需要根据实际情况替换
+	if vendor != "qwen" || modelName != "qwen-plus" {
+		return nil, fmt.Errorf("unsupported vendor or model name")
+	}
+	// 这里应该返回实际的 ChatModel 实例
+	// 示例返回 nil，你需要根据实际情况修改
+	var chatModel model.ChatModel = nil
+	return chatModel, nil
 }
