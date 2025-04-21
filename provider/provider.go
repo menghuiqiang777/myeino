@@ -9,11 +9,12 @@ import (
 
 	"github.com/cloudwego/eino-ext/components/model/ark"
 	"github.com/cloudwego/eino-ext/components/model/qwen"
+	"github.com/cloudwego/eino/components/model"
 )
 
 // Provider 是一个模型提供者的接口
 type Provider interface {
-	InitModel(modelID string) (interface{}, error)
+	InitModel(modelName string) (interface{}, error)
 }
 
 // baseProvider 包含了公共的初始化逻辑
@@ -22,14 +23,14 @@ type baseProvider struct {
 	baseURLEnv   string
 	defaultModel string
 	initFunc     func(ctx context.Context, config interface{}) (interface{}, error)
-	configFunc   func(apiKey, baseURL, modelID string) interface{}
+	configFunc   func(apiKey, baseURL, modelName string) interface{}
 }
 
-func (bp *baseProvider) InitModel(modelID string) (interface{}, error) {
+func (bp *baseProvider) InitModel(modelName string) (interface{}, error) {
 	var timeout = 30 * time.Second
 	// 处理默认值
-	if modelID == "" {
-		modelID = bp.defaultModel
+	if modelName == "" {
+		modelName = bp.defaultModel
 	}
 
 	// 创建带有超时的上下文
@@ -54,7 +55,7 @@ func (bp *baseProvider) InitModel(modelID string) (interface{}, error) {
 	}
 
 	// 初始化模型
-	config := bp.configFunc(apiKey, baseURL, modelID)
+	config := bp.configFunc(apiKey, baseURL, modelName)
 	model, err := bp.initFunc(ctx, config)
 	if err != nil {
 		log.Println(err)
@@ -78,11 +79,11 @@ func NewQwenProvider() *QwenProvider {
 			initFunc: func(ctx context.Context, config interface{}) (interface{}, error) {
 				return qwen.NewChatModel(ctx, config.(*qwen.ChatModelConfig))
 			},
-			configFunc: func(apiKey, baseURL, modelID string) interface{} {
+			configFunc: func(apiKey, baseURL, modelName string) interface{} {
 				return &qwen.ChatModelConfig{
 					BaseURL: baseURL,
 					APIKey:  apiKey,
-					Model:   modelID,
+					Model:   modelName,
 				}
 			},
 		},
@@ -103,10 +104,10 @@ func NewArkProvider() *ArkProvider {
 			initFunc: func(ctx context.Context, config interface{}) (interface{}, error) {
 				return ark.NewChatModel(ctx, config.(*ark.ChatModelConfig))
 			},
-			configFunc: func(apiKey, _, modelID string) interface{} {
+			configFunc: func(apiKey, _, modelName string) interface{} {
 				return &ark.ChatModelConfig{
 					APIKey: apiKey,
-					Model:  modelID,
+					Model:  modelName,
 				}
 			},
 		},
@@ -123,4 +124,21 @@ func GetProvider(vendor string) (Provider, error) {
 	default:
 		return nil, fmt.Errorf("unsupported vendor: %s", vendor)
 	}
+}
+
+// GetChatModel 根据厂商和模型名称返回 ChatModel 类型的模型
+func GetChatModel(vendor, modelName string) (model.ChatModel, error) {
+	provider, err := GetProvider(vendor)
+	if err != nil {
+		return nil, err
+	}
+	modelObj, err := provider.InitModel(modelName)
+	if err != nil {
+		return nil, err
+	}
+	chatModel, ok := modelObj.(model.ChatModel)
+	if !ok {
+		return nil, fmt.Errorf("the initialized model does not implement the ChatModel interface")
+	}
+	return chatModel, nil
 }
