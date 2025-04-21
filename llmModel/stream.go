@@ -7,11 +7,10 @@ import (
 	"github.com/cloudwego/eino/schema"
 )
 
-// reportStream 函数用于处理从 StreamReader 接收的消息
+// ReportStream 函数用于处理从 StreamReader 接收的消息
 // 它会持续接收消息，直接输出，直到遇到 EOF 或发生错误
 // 如果发生错误，会返回错误信息给调用者
-// 流式调用大模型
-func reportStream(sr *schema.StreamReader[*schema.Message]) error {
+func ReportStream(sr *schema.StreamReader[*schema.Message]) error {
 	defer sr.Close()
 
 	for {

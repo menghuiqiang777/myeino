@@ -34,13 +34,11 @@ func (r *Runner) Process(ctx context.Context, isGenerate bool) (*schema.Message,
 	if isGenerate {
 		// 创建正确的 ParamsOneOf 实例
 		openAPIV3Schema := &openapi3.Schema{
-			// 这里根据实际情况设置属性
-			Type:       &openapi3.Types{Value: openapi3.TypeObject},
+			Type:       &openapi3.Types{Value: string(openapi3.TypeObject)},
 			Properties: make(map[string]*openapi3.SchemaRef),
 			Required:   []string{},
 		}
 		paramsOneOf := schema.NewParamsOneOfByOpenAPIV3(openAPIV3Schema)
-		// 假设 llmModel.Generate 方法需要传递 paramsOneOf
 		result, err := llmModel.Generate(ctx, r.agent.Model, messages, paramsOneOf)
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate response: %w", err)
@@ -60,13 +58,11 @@ func (r *Runner) ProcessStream(ctx context.Context) error {
 	}
 	// 创建正确的 ParamsOneOf 实例
 	openAPIV3Schema := &openapi3.Schema{
-		// 这里根据实际情况设置属性
-		Type:       &openapi3.Types{Value: openapi3.TypeObject},
+		Type:       &openapi3.Types{Value: string(openapi3.TypeObject)},
 		Properties: make(map[string]*openapi3.SchemaRef),
 		Required:   []string{},
 	}
 	paramsOneOf := schema.NewParamsOneOfByOpenAPIV3(openAPIV3Schema)
-	// 假设 llmModel.Stream 方法需要传递 paramsOneOf
 	streamResult, err := llmModel.Stream(ctx, r.agent.Model, messages, paramsOneOf)
 	if err != nil {
 		return fmt.Errorf("failed to start streaming: %w", err)
