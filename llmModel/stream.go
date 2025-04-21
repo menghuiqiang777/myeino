@@ -1,4 +1,4 @@
-package mschema
+package llmModel
 
 import (
 	"fmt"
