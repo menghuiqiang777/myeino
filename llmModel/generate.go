@@ -9,7 +9,14 @@ import (
 )
 
 // Generate 调用模型的 Generate 方法生成回复消息
-func Generate(ctx context.Context, llm model.ChatModel, in []*schema.Message) (*schema.Message, error) {
+func Generate(ctx context.Context, llm model.ChatModel, in []*schema.Message, paramsOneOf *schema.ParamsOneOf) (*schema.Message, error) {
+	// 这里需要根据实际情况处理 paramsOneOf
+	// 假设需要调用 ToOpenAPIV3 方法
+	openAPIV3Schema, err := paramsOneOf.ToOpenAPIV3()
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert params to OpenAPIV3 schema: %w", err)
+	}
+	// 这里根据实际情况将 openAPIV3Schema 传递给模型
 	result, err := llm.Generate(ctx, in)
 	if err != nil {
 		return nil, fmt.Errorf("llm generate failed: %w", err)
@@ -18,7 +25,14 @@ func Generate(ctx context.Context, llm model.ChatModel, in []*schema.Message) (*
 }
 
 // Stream 调用模型的 Stream 方法获取流式回复
-func Stream(ctx context.Context, llm model.ChatModel, in []*schema.Message) (*schema.StreamReader[*schema.Message], error) {
+func Stream(ctx context.Context, llm model.ChatModel, in []*schema.Message, paramsOneOf *schema.ParamsOneOf) (*schema.StreamReader[*schema.Message], error) {
+	// 这里需要根据实际情况处理 paramsOneOf
+	// 假设需要调用 ToOpenAPIV3 方法
+	openAPIV3Schema, err := paramsOneOf.ToOpenAPIV3()
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert params to OpenAPIV3 schema: %w", err)
+	}
+	// 这里根据实际情况将 openAPIV3Schema 传递给模型
 	result, err := llm.Stream(ctx, in)
 	if err != nil {
 		return nil, fmt.Errorf("llm stream failed: %w", err)
