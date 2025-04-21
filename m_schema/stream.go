@@ -1,4 +1,4 @@
-package m_schema
+package mschema
 
 import (
 	"fmt"
