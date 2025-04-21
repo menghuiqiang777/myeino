@@ -1,4 +1,4 @@
-package llmMOdel
+package llmModel
 
 import (
 	"fmt"
